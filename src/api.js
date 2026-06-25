@@ -14,7 +14,18 @@ function buildUrl(path, params = {}) {
 }
 
 async function fetchJson(path, params = {}) {
-  const res = await fetch(buildUrl(path, params))
+  let res
+  try {
+    res = await fetch(buildUrl(path, params))
+  } catch (err) {
+    if (err?.message === 'Failed to fetch') {
+      throw new Error(
+        'Cannot reach the API from this site. Deploy the Cloudflare Worker proxy (see README).',
+      )
+    }
+    throw err
+  }
+
   let data
   try {
     data = await res.json()
