@@ -18,10 +18,16 @@ A personal mobile app (PWA) for browsing ASX/NZX market data with a native mobil
 
 Fetches from the same QuoteAPI endpoints used by [stocknessmonster.com](https://stocknessmonster.com/) (public browser API, CORS-enabled). No server required.
 
-## Quick start
+## Live site
+
+**https://irradiatedturtl.github.io/ANZ_Company_Filings_Mobile/**
+
+Open on your phone and use **Add to Home Screen** for an app-like experience.
+
+## Quick start (local dev)
 
 ```bash
-cd sm-mobile-shell
+cd ANZ_Company_Filings_Mobile
 npm install
 npm run dev
 ```
@@ -45,37 +51,17 @@ npm run build
 npm run preview
 ```
 
-## Deploy to GitHub Pages (free, works anywhere)
+## Deploy to GitHub Pages
 
-The app deploys as a **website** that can also be **installed** via Add to Home Screen (PWA manifest included).
+Deployed automatically on push to `main` via GitHub Actions.
 
-1. Create a new **public** GitHub repo named `sm-mobile-shell` (or any name — the workflow uses the repo name as the URL path).
-
-2. Push this project:
-
-```bash
-cd sm-mobile-shell
-git init
-git add .
-git commit -m "Initial commit: SM Mobile PWA"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/sm-mobile-shell.git
-git push -u origin main
-```
-
-3. On GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-
-4. After the workflow finishes (~1 min), your app is live at:
-
-`https://YOUR_USERNAME.github.io/sm-mobile-shell/`
-
-Open that URL on your phone and use **Add to Home Screen** — it works on mobile data, no PC required.
+1. **Settings → Pages → Source: GitHub Actions** (one-time setup)
+2. Push to `main` — live at `https://irradiatedturtl.github.io/ANZ_Company_Filings_Mobile/`
 
 ### Local build matching GitHub Pages paths
 
-```bash
-# Windows PowerShell
-$env:BASE_PATH="/sm-mobile-shell/"; npm run build
+```powershell
+$env:BASE_PATH="/ANZ_Company_Filings_Mobile/"; npm run build
 ```
 
 ## Cost
