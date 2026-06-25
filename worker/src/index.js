@@ -1,4 +1,5 @@
 const UPSTREAM = 'https://quoteapi.com/api/v5'
+const APP_ID = 'da9866271f9d0071'
 
 export default {
   async fetch(request) {
@@ -11,9 +12,29 @@ export default {
     }
 
     const url = new URL(request.url)
+    if (url.pathname === '/' || url.pathname === '') {
+      return withCors(
+        new Response(
+          JSON.stringify({
+            ok: true,
+            message: 'ANZ Filings API proxy — use /api/v5/... paths',
+            example: `${url.origin}/api/v5/symbols/tls.asx`,
+          }),
+          { headers: { 'Content-Type': 'application/json' } },
+        ),
+        request,
+      )
+    }
+
     const path = url.pathname.replace(/^\/api\/v5/, '') || '/'
     const target = new URL(`${UPSTREAM}${path}`)
-    target.search = url.search
+
+    url.searchParams.forEach((value, key) => {
+      target.searchParams.set(key, value)
+    })
+    if (!target.searchParams.has('appID')) {
+      target.searchParams.set('appID', APP_ID)
+    }
 
     const upstream = await fetch(target.toString(), {
       headers: { Origin: 'https://stocknessmonster.com' },

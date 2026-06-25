@@ -2,6 +2,7 @@ import './style.css'
 import {
   documentUrl,
   fetchAnnouncements,
+  fetchChartTrades,
   fetchMarketAnnouncements,
   fetchQuote,
   fetchTrades,
@@ -201,12 +202,12 @@ async function loadTradesView(symbol, token) {
 async function loadChartView(symbol, token) {
   const [quoteData, tradesData] = await Promise.all([
     fetchQuote(symbol),
-    fetchTrades(symbol, 1),
+    fetchChartTrades(symbol),
   ])
   if (token !== loadToken) return
 
   const header = `<div class="view-header"><h2>${displayCode(symbol)} chart</h2><span class="view-sub">Intraday</span></div>`
-  const chart = renderChartFromTrades(tradesData.rows.reverse(), quoteData.quote)
+  const chart = renderChartFromTrades(tradesData.rows, quoteData.quote)
   renderPanel(header + chart)
 }
 

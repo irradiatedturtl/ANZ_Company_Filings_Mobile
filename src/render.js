@@ -155,13 +155,28 @@ export function renderChartFromTrades(rows, quote) {
     return '<div class="empty-state"><p>No chart data available.</p></div>'
   }
 
-  const prices = rows.map((r) => Number(r.price)).filter((p) => !Number.isNaN(p))
+  const sampled = downsampleRows(rows, 250)
+  const prices = sampled.map((r) => Number(r.price)).filter((p) => !Number.isNaN(p))
   if (!prices.length) {
     return '<div class="empty-state"><p>No chart data available.</p></div>'
   }
 
-  const min = Math.min(...prices)
-  const max = Math.max(...prices)
+  let min = Math.min(...prices)
+  let max = Math.max(...prices)
+
+  if (min === max) {
+    const qHigh = Number(quote?.high)
+    const qLow = Number(quote?.low)
+    if (!Number.isNaN(qHigh) && !Number.isNaN(qLow) && qHigh !== qLow) {
+      min = qLow
+      max = qHigh
+    } else {
+      const pad = Math.max(min * 0.01, 0.01)
+      min -= pad
+      max += pad
+    }
+  }
+
   const range = max - min || 0.01
   const w = 360
   const h = 180
@@ -185,6 +200,11 @@ export function renderChartFromTrades(rows, quote) {
     ? `<line x1="${pad}" y1="${prevY}" x2="${w - pad}" y2="${prevY}" class="chart-prev" />`
     : ''
 
+  const flatNote =
+    Math.min(...prices) === Math.max(...prices)
+      ? ' · limited movement today'
+      : ''
+
   return `<div class="chart-card">
     <div class="chart-labels">
       <span>$${formatPrice(max)}</span>
@@ -194,8 +214,18 @@ export function renderChartFromTrades(rows, quote) {
       ${prevLine}
       <polyline points="${points}" class="chart-line" />
     </svg>
-    <p class="chart-note">Intraday from today's trades (simplified)</p>
+    <p class="chart-note">Intraday from today's trades (sampled)${flatNote}</p>
   </div>`
+}
+
+function downsampleRows(rows, maxPoints) {
+  if (rows.length <= maxPoints) return rows
+  const step = rows.length / maxPoints
+  const result = []
+  for (let i = 0; i < maxPoints; i += 1) {
+    result.push(rows[Math.floor(i * step)])
+  }
+  return result
 }
 
 function escapeHtml(text) {

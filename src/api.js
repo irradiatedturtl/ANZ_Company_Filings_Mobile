@@ -135,3 +135,42 @@ export async function fetchTrades(symbol, page = 1) {
     meta: data.trades,
   }
 }
+
+function tradeTimeMs(time) {
+  if (!time) return 0
+  return new Date(time.replace(' ', 'T')).getTime()
+}
+
+function chartSamplePages(pageCount, maxSamples = 10) {
+  if (pageCount <= 1) return [1]
+  const pages = new Set([1, pageCount])
+  const slots = Math.min(maxSamples, pageCount) - 2
+  if (slots > 0) {
+    const step = (pageCount - 1) / (slots + 1)
+    for (let i = 1; i <= slots; i += 1) {
+      pages.add(Math.round(i * step))
+    }
+  }
+  return [...pages].sort((a, b) => a - b)
+}
+
+export async function fetchChartTrades(symbol, maxSamples = 10) {
+  const first = await fetchTrades(symbol, 1)
+  const pageCount = first.meta?.pageCount || 1
+  const pages = chartSamplePages(pageCount, maxSamples)
+
+  const batches = await Promise.all(
+    pages.map((page) => (page === 1 ? Promise.resolve(first) : fetchTrades(symbol, page))),
+  )
+
+  const rows = batches
+    .flatMap((batch) => batch.rows)
+    .sort((a, b) => tradeTimeMs(a.time) - tradeTimeMs(b.time))
+
+  return {
+    rows,
+    meta: first.meta,
+    sampledPages: pages.length,
+    pageCount,
+  }
+}
